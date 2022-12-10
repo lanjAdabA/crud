@@ -1,19 +1,27 @@
-import 'package:crud/pages/home.page.dart';
+import 'package:crud/router/router.gr.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  @override
+  final _appRouter = AppRouter();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-            backgroundColor: Colors.grey,
-            appBarTheme: const AppBarTheme(color: Colors.grey)),
-        home: HomePage());
+    return MaterialApp.router(
+      routerDelegate: _appRouter.delegate(),
+      routeInformationParser: _appRouter.defaultRouteParser(),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+          backgroundColor: Colors.grey,
+          appBarTheme: const AppBarTheme(color: Colors.grey)),
+      builder: EasyLoading.init(),
+
+      // home: const HomePage()
+    );
   }
 }

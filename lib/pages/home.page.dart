@@ -1,8 +1,19 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:developer';
 
-import 'package:crud/serviceAPI.dart';
-import 'package:crud/models/employee.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:crud/router/router.gr.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:intl/intl.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+
+import 'package:crud/models/department.dart';
+import 'package:crud/models/designation.dart';
+import 'package:crud/models/employee.dart';
+import 'package:crud/serviceAPI.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,24 +23,83 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? dropDownDesignation;
+  String? dropDownDepartment;
+  String? dropDownDesignation1;
+  String? dropDownDepartment1;
 
+  final TextEditingController namefieldcontroller = TextEditingController();
+  final TextEditingController designationfieldcontroller =
+      TextEditingController();
+  final TextEditingController departmentfieldcontroller =
+      TextEditingController();
+  String dateTime = "";
+  String dateTime2 = "";
+  String dateTime3 = "";
+  String dateTime4 = "";
 
+// todo var format = DateFormat("dd-MM-yyyy");
 
-  final TextEditingController namefieldcontroller =TextEditingController();
-  final TextEditingController designationfieldcontroller =TextEditingController();
-  final TextEditingController departmentfieldcontroller =TextEditingController();
-  String dateTimer="";
-
-  var format=DateFormat("dd-MM-yyyy");
-  
   List<Employee> newEmployeeList = [];
+  List<Designation> newDesignationList = [];
+  List<Department> newDepartmentList = [];
 
-  // final DateTime _dateTime = DateTime.now();
+  var format = DateFormat("dd-MM-yyyy");
+
+  List<String> allDesId = [];
+  List<String> allDepId = [];
+  List<String> allDesName = [];
+  List<String> allDepName = [];
+
+//todo
+
   DateTimeRange dateRange =
       DateTimeRange(start: DateTime.now(), end: DateTime.now());
 
   DateTime? start = DateTime.now();
   DateTime? end = DateTime.now();
+
+  Widget _dataofbirth(String dob) {
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: DateTimeField(
+              controller: TextEditingController(text: dob),
+              decoration: const InputDecoration(
+                labelText: ' Select Date of Birth',
+              ),
+              format: format,
+              onShowPicker: (context, currentValue) {
+                return showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2030),
+                        helpText: "SELECT DATE OF BIRTH",
+                        cancelText: "CANCEL",
+                        confirmText: "OK",
+                        fieldHintText: "DATE/MONTH/YEAR",
+                        fieldLabelText: "ENTER YOUR DATE OF BIRTH",
+                        errorFormatText: "Enter a Valid Date",
+                        errorInvalidText: "Date Out of Range")
+                    .then((value) {
+                  setState(() {
+                    dateTime = "${value!.year}-${value.month}-${value.day}";
+                    dateTime2 = "${value.year}-${value.month}-${value.day}";
+                  });
+
+                  return value;
+                });
+              },
+            ),
+          ),
+        ]);
+  }
 
   @override
   void initState() {
@@ -38,11 +108,30 @@ class _HomePageState extends State<HomePage> {
     getData();
   }
 
-  getData() async {
+  Future getData() async {
     final employeeData = await ServiceApi().get_employee();
+    final designationData = await ServiceApi().get_designation();
+    final departmentData = await ServiceApi().get_department();
+
     setState(() {
       newEmployeeList = employeeData!;
+      newDepartmentList = departmentData!;
+      newDesignationList = designationData!;
     });
+    for (var element in newDesignationList) {
+      allDesId.add(element.id.toString());
+    }
+    for (var element in newDepartmentList) {
+      allDepId.add(element.id.toString());
+    }
+    for (var element in newDesignationList) {
+      allDesName.add(element.name.toString());
+    }
+    for (var element in newDepartmentList) {
+      allDepName.add(element.name.toString());
+    }
+    log(allDepId.toString());
+    log(allDesId.toString());
   }
 
   @override
@@ -50,112 +139,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.grey[400],
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (ctx) {
-              return StatefulBuilder(
-                builder: (BuildContext context,
-                    void Function(void Function()) setState) {
-                  return AlertDialog(
-                    title: const Text(
-                      "Add new Employee details",
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    content: SizedBox(
-                      height: MediaQuery.of(context).size.height / 5,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const TextField(
-                            decoration: InputDecoration.collapsed(
-                                hintText: 'Enter Employee Name:'),
-                          ),
-                          const TextField(
-                            decoration: InputDecoration.collapsed(
-                              hintText: 'Enter Employee Id:',
-                            ),
-                            keyboardType: TextInputType.numberWithOptions(),
-                          ),
-                          const TextField(
-                            decoration: InputDecoration.collapsed(
-                                hintText: 'Enter Employee Designation:'),
-                          ),
-                          const TextField(
-                            decoration: InputDecoration.collapsed(
-                                hintText: 'Enter Department ID/Name:'),
-                          ),
-                          TextButton(
-                              style: const ButtonStyle(),
-                              onPressed: () {
-                                showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1980),
-                                  lastDate: DateTime(2023),
-                                );
-                              },
-                              child: const ListTile(
-                                title: Text("Select D.O.B."),
-                                leading: Icon(Icons.date_range_outlined),
-                              )),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ConstrainedBox(
-                            constraints: const BoxConstraints.tightFor(
-                                height: 40, width: 130),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                  shadowColor: Colors.red,
-                                  elevation: 5,
-                                  backgroundColor: Colors.grey[300]),
-                              onPressed: () async {
-                                await ServiceApi().create_employee(name: namefieldcontroller.text, desId: designationfieldcontroller.text, depId: depId, dob: dob)
-                                Navigator.of(ctx).pop();
-                              },
-                              label: const Text(
-                                "Cancel",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              icon: const Icon(Icons.cancel),
-                            ),
-                          ),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints.tightFor(
-                                height: 40, width: 130),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                  shadowColor: Colors.blue,
-                                  elevation: 5,
-                                  backgroundColor: Colors.green),
-                              onPressed: () {
-                                Navigator.of(ctx).pop();
-                              },
-                              label: const Text(
-                                "Create",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              icon: const Icon(Icons.add_circle),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      )
-                    ],
-                  );
-                },
-              );
-            },
-          );
+        onPressed: () async {
+          await CreateNewEmployeeDialogue(context);
         },
         label: const Text("Create New Employee"),
         icon: const Icon(Icons.add),
@@ -184,156 +169,285 @@ class _HomePageState extends State<HomePage> {
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: newEmployeeList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final data = newEmployeeList[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20)),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              text: 'Employee Name:   ',
-                              style: DefaultTextStyle.of(context).style,
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: newEmployeeList[index].name,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blueGrey,
-                                        fontStyle: FontStyle.italic,
-                                        fontSize: 20)),
+            const SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: newEmployeeList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    // final data = newEmployeeList[index];
+
+                    int desind = allDesId.indexOf(
+                        newEmployeeList[index].designationId.toString());
+
+                    int depind = allDepId.indexOf(
+                        newEmployeeList[index].departmentId.toString());
+                    // ! listTileBlock
+                    return Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            color:
+                                index.isEven ? Colors.white : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(20)),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    text: 'Employee Name:   ',
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                          text: newEmployeeList[index].name,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.blueGrey,
+                                              fontStyle: FontStyle.normal,
+                                              fontSize: 18)),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                    padding: const EdgeInsets.only(right: 20),
+                                    onPressed: () {
+                                      log("pressed menu button more");
+//! menu option button for update n delete
+                                      showMenu(
+                                        context: context,
+                                        position: const RelativeRect.fromLTRB(
+                                            500.0, 500.0, 140.0, 20.0),
+                                        items: [
+                                          PopupMenuItem(
+                                            child: InkWell(
+                                              onTap: () {
+                                                int ind1 = allDesId.indexOf(
+                                                    newEmployeeList[index]
+                                                        .designationId
+                                                        .toString());
+                                                int ind2 = allDepId.indexOf(
+                                                    newEmployeeList[index]
+                                                        .departmentId
+                                                        .toString());
+
+                                                setState(() {
+                                                  namefieldcontroller.text =
+                                                      newEmployeeList[index]
+                                                          .name;
+
+                                                  dropDownDesignation =
+                                                      allDesName[ind1];
+
+                                                  dropDownDepartment =
+                                                      allDepName[ind2];
+
+                                                  dropDownDesignation1 =
+                                                      newEmployeeList[index]
+                                                          .designationId
+                                                          .toString();
+
+                                                  dropDownDepartment1 =
+                                                      newEmployeeList[index]
+                                                          .departmentId
+                                                          .toString();
+
+                                                  dateTime2 =
+                                                      "${newEmployeeList[index].dateOfBirth.day}-${newEmployeeList[index].dateOfBirth.month}-${newEmployeeList[index].dateOfBirth.year}";
+                                                  dateTime4 =
+                                                      "${newEmployeeList[index].dateOfBirth.year}-${newEmployeeList[index].dateOfBirth.month}-${newEmployeeList[index].dateOfBirth.day}";
+                                                });
+                                                Navigator.pop(context);
+
+                                                UpdateEmployeeDetailShowDidalog(
+                                                    context, index);
+                                              },
+                                              child: const ListTile(
+                                                  title: Text("Update"),
+                                                  leading: Icon(Icons.sync)),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            child: InkWell(
+                                              onTap: () {
+                                                ServiceApi()
+                                                    .delete_employee(
+                                                        id: newEmployeeList[
+                                                                index]
+                                                            .id
+                                                            .toString())
+                                                    .whenComplete(() {
+                                                  getData();
+                                                  Navigator.of(context).pop();
+                                                  setState(() {
+                                                    allDesId = [];
+                                                    allDepId = [];
+                                                    allDepName = [];
+                                                    allDesName = [];
+                                                  });
+                                                });
+                                              },
+                                              child: const ListTile(
+                                                  title: Text("Remove"),
+                                                  leading: Icon(
+                                                      Icons.delete_outline)),
+                                            ),
+                                          ),
+                                        ],
+                                        elevation: 8.0,
+                                      );
+                                    },
+                                    icon: const Icon(
+                                      Icons.more_horiz,
+                                      size: 48,
+                                    ))
                               ],
                             ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  text: 'Employee Id:   ',
-                                  style: DefaultTextStyle.of(context).style,
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: newEmployeeList[index]
-                                            .id
-                                            .toString(),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.deepPurple,
-                                            fontStyle: FontStyle.normal,
-                                            fontSize: 18)),
-                                  ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    text: 'Employee Id:   ',
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                          text: newEmployeeList[index]
+                                              .id
+                                              .toString(),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.deepPurple,
+                                              fontStyle: FontStyle.normal,
+                                              fontSize: 18)),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              RichText(
-                                text: TextSpan(
-                                  text: 'Department Id:   ',
-                                  style: DefaultTextStyle.of(context).style,
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: newEmployeeList[index]
-                                            .departmentId
-                                            .toString(),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.deepPurple,
-                                            fontStyle: FontStyle.normal,
-                                            fontSize: 18)),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                  padding: const EdgeInsets.only(right: 20),
-                                  onPressed: () {
-                                    log("pressed menu button more");
+                                RichText(
+                                  text: TextSpan(
+                                    //! dpt name
+                                    text: 'Designation :  ',
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                          text: allDesName[desind].toString(),
 
-                                    showMenu(
-                                      context: context,
-                                      position: const RelativeRect.fromLTRB(
-                                          500.0, 500.0, 140.0, 20.0),
-                                      items: [
-                                        const PopupMenuItem(
-                                          child: ListTile(
-                                              title: Text("Update"),
-                                              leading: Icon(Icons.sync)),
-                                        ),
-                                        PopupMenuItem(
-                                          child: InkWell(
-                                            onTap: () {
-                                              ServiceApi()
-                                                  .delete_employee(
-                                                      id: newEmployeeList[index]
-                                                          .id
-                                                          .toString())
-                                                  .whenComplete(() {
-                                                getData();
-                                                Navigator.of(context).pop();
-                                              });
-                                            },
-                                            child: const ListTile(
-                                                title: Text("Remove"),
-                                                leading:
-                                                    Icon(Icons.delete_outline)),
-                                          ),
-                                        ),
+                                          // text: newEmployeeList[index]
+                                          //     .departmentId
+                                          //     .toString(),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.deepPurple,
+                                              fontStyle: FontStyle.normal,
+                                              fontSize: 18)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      //! dpt name
+                                      text: 'Department Id :',
+                                      style: DefaultTextStyle.of(context).style,
+                                      children: <TextSpan>[
+                                        TextSpan(
+                                            text: allDepId[depind].toString(),
+
+                                            // text: newEmployeeList[index]
+                                            //     .departmentId
+                                            //     .toString(),
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.deepPurple,
+                                                fontStyle: FontStyle.normal,
+                                                fontSize: 18)),
                                       ],
-                                      elevation: 8.0,
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    Icons.more_horiz,
-                                    size: 48,
-                                  ))
-                            ],
-                          ),
-                        ],
+                                    ),
+                                  ),
+                                ),
+                                RichText(
+                                  text: TextSpan(
+                                    //! dpt name
+                                    text: 'Department Name : ',
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                          text: allDepName[depind].toString(),
+
+                                          // text: newEmployeeList[index]
+                                          //     .departmentId
+                                          //     .toString(),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.deepPurple,
+                                              fontStyle: FontStyle.normal,
+                                              fontSize: 18)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+            ),
             const SizedBox(
               height: 20,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+// ! navigate to department list
                 ConstrainedBox(
                   constraints: const BoxConstraints.tightFor(
                     height: 50,
                   ),
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                        // shadowColor: Colors.red,
+                        shadowColor: Colors.blue[700],
                         elevation: 5,
                         backgroundColor: Colors.grey[700]),
                     icon: const Icon(Icons.business_rounded),
-                    onPressed: () {},
+                    onPressed: () {
+                      context.router.push(const DepartmentRoute());
+                      EasyLoading.showToast("Showing Department List");
+                    },
                     label: const Text("View Department List"),
                   ),
                 ),
+// ! navigate to designation List
                 ConstrainedBox(
                   constraints: const BoxConstraints.tightFor(
                     height: 50,
                   ),
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                        // shadowColor: Colors.red,
+                        shadowColor: Colors.red,
                         elevation: 5,
                         backgroundColor: Colors.grey[700]),
                     icon: const Icon(Icons.badge_outlined),
-                    onPressed: () {},
+                    onPressed: () {
+                      context.router.push(const DesignationRoute());
+                      EasyLoading.showToast(" Showing Designation List");
+                    },
                     label: const Text("View Designation List"),
                   ),
                 ),
@@ -345,6 +459,336 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<dynamic> UpdateEmployeeDetailShowDidalog(
+      BuildContext context, int index) {
+    return showDialog(
+      context: context,
+      builder: (cnt) {
+        return StatefulBuilder(builder:
+            ((BuildContext context, void Function(void Function()) setState) {
+          return AlertDialog(
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                          shadowColor: Colors.red,
+                          elevation: 5,
+                          backgroundColor: Colors.grey[300]),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      label: const Text(
+                        "Cancel",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      icon: const Icon(Icons.cancel),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            shadowColor: Colors.blue,
+                            elevation: 5,
+                            backgroundColor: Colors.green),
+                        onPressed: () {
+                          ServiceApi()
+                              .update_employee(
+                                  id: newEmployeeList[index].id.toString(),
+                                  name: namefieldcontroller.text,
+                                  desId: dropDownDesignation1!,
+                                  depId: dropDownDepartment1!,
+                                  dob: dateTime4)
+                              .whenComplete(() {
+                            getData();
+                            Navigator.pop(context);
+                          });
+                          setState(() {
+                            allDesId = [];
+                            allDepId = [];
+                            allDepName = [];
+                            allDesName = [];
+                          });
+                        },
+                        label: const Text(
+                          "Update",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        icon: const Icon(Icons.add_circle),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+              title: const Text("Update Employee Details"),
+              content: Form(
+                child: SizedBox(
+                  height: 250,
+                  child: Column(
+                    children: [
+                      TextField(
+                          keyboardType: TextInputType.text,
+                          controller: namefieldcontroller,
+                          decoration: const InputDecoration.collapsed(
+                            hintText: 'Name',
+                          )),
+                      Row(
+                        children: [
+                          const Text('Designation :'),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          DropdownButtonHideUnderline(
+                            child: DropdownButton2<String>(
+                              dropdownDecoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10)),
+                              dropdownDirection: DropdownDirection.left,
+                              dropdownWidth: 200,
+                              hint: const Text('Select'),
+                              value: dropDownDesignation,
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              items: allDesName.map((String items) {
+                                log(items);
+                                return DropdownMenuItem(
+                                  value: items,
+                                  child: Text(items.toString()),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  dropDownDesignation = newValue!;
+                                });
+                                int ind =
+                                    allDesName.indexOf(dropDownDesignation!);
+                                dropDownDesignation1 = allDesId[ind];
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text("Department :"),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          DropdownButtonHideUnderline(
+                            child: DropdownButton2(
+                              dropdownDecoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10)),
+                              dropdownDirection: DropdownDirection.left,
+                              dropdownWidth: 200,
+                              hint: const Text('Select'),
+                              value: dropDownDepartment,
+                              // Initial Value
+
+                              // Down Arrow Icon
+                              icon: const Icon(Icons.keyboard_arrow_down),
+
+                              // Array list of items
+                              items: allDepName.map((String items) {
+                                return DropdownMenuItem(
+                                  value: items,
+                                  child: Text(items),
+                                );
+                              }).toList(),
+                              // After selecting the desired option,it will
+                              // change button value to selected value
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  dropDownDepartment = newValue!;
+                                });
+                                int ind =
+                                    allDepName.indexOf(dropDownDepartment!);
+                                dropDownDepartment1 = allDepId[ind];
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      _dataofbirth(dateTime2),
+                    ],
+                  ),
+                ),
+              ));
+        }));
+      },
+    );
+  }
+
+  CreateNewEmployeeDialogue(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder:
+              (BuildContext context, void Function(void Function()) setState) {
+            return AlertDialog(
+              title: const Text(
+                "Add new Employee details",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(
+                height: MediaQuery.of(context).size.height / 4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextField(
+                      keyboardType: TextInputType.text,
+                      controller: namefieldcontroller,
+                      decoration: const InputDecoration.collapsed(
+                          hintText: 'Enter Employee Name:'),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        const Text("Select Designation : "),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton2(
+                            dropdownDecoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10)),
+                            dropdownDirection: DropdownDirection.left,
+                            dropdownWidth: 200,
+                            hint: const Text('Choose'),
+                            value: dropDownDesignation,
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            items: allDesName.map((String items) {
+                              log(items);
+                              return DropdownMenuItem(
+                                value: items,
+                                child: Text(items.toString()),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                dropDownDesignation = newValue as String;
+                              });
+                              int indexOfDeg =
+                                  allDesName.indexOf(dropDownDesignation!);
+                              dropDownDesignation1 = allDesId[indexOfDeg];
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Text("Select Department : "),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton2(
+                            dropdownDecoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10)),
+                            alignment: Alignment.center,
+                            dropdownElevation: 10,
+                            dropdownPadding: const EdgeInsets.only(left: 25),
+                            dropdownDirection: DropdownDirection.left,
+                            dropdownWidth: 200,
+                            hint: const Text('Choose'),
+                            value: dropDownDepartment,
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            items: allDepName.map((String items) {
+                              return DropdownMenuItem(
+                                value: items,
+                                child: Text(items),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                dropDownDepartment = newValue!;
+                              });
+                              int indexOfDep =
+                                  allDepName.indexOf(dropDownDepartment!);
+                              dropDownDepartment1 = allDepId[indexOfDep];
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    _dataofbirth(dateTime2),
+                  ],
+                ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints.tightFor(height: 40, width: 130),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            shadowColor: Colors.red,
+                            elevation: 5,
+                            backgroundColor: Colors.grey[300]),
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                        label: const Text(
+                          "Cancel",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        icon: const Icon(Icons.cancel),
+                      ),
+                    ),
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints.tightFor(height: 40, width: 130),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            shadowColor: Colors.blue,
+                            elevation: 5,
+                            backgroundColor: Colors.green),
+                        onPressed: () async {
+                          log(dropDownDepartment1.toString());
+                          log(dropDownDesignation1.toString());
+                          log(dateTime.toString());
+                          await ServiceApi()
+                              .create_employee(
+                                  name: namefieldcontroller.text,
+                                  desId: dropDownDesignation1.toString(),
+                                  depId: dropDownDepartment1.toString(),
+                                  dob: dateTime.toString())
+                              .whenComplete(() {
+                            Navigator.of(ctx).pop(context);
+                            getData();
+                          });
+                          setState(() {
+                            allDesId = [];
+                            allDepId = [];
+                            allDepName = [];
+                            allDesName = [];
+                          });
+                        },
+                        label: const Text(
+                          "Create",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        icon: const Icon(Icons.add_circle),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 12,
+                )
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
