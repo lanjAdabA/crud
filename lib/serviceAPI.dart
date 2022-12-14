@@ -115,4 +115,37 @@ class ServiceApi {
     }
     return null;
   }
+
+  Future create_designation({
+    required String designationName,
+  }) async {
+    final response = await http.post(
+        Uri.parse(
+            "http://phpstack-598410-2859373.cloudwaysapps.com/api/designations"),
+        body: {
+          "name": designationName,
+        });
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      log('Successfully Added new Designatiom');
+    } else {
+      log('Failed to Add Designation Field. ');
+      log(response.statusCode.toString());
+      return null;
+    }
+  }
+
+  Future delete_designation({
+    required String id,
+  }) async {
+    final response = await http.delete(Uri.parse(
+        "http://phpstack-598410-2859373.cloudwaysapps.com/api/designations/$id"));
+    if (response.statusCode == 204) {
+      log("Designation field deleted successfully");
+    } else {
+      log("failed to delete Designation data");
+      log(response.statusCode.toString());
+    }
+    return null;
+  }
 }

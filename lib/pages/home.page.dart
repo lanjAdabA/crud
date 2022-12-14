@@ -38,8 +38,6 @@ class _HomePageState extends State<HomePage> {
   String dateTime3 = "";
   String dateTime4 = "";
 
-// todo var format = DateFormat("dd-MM-yyyy");
-
   List<Employee> newEmployeeList = [];
   List<Designation> newDesignationList = [];
   List<Department> newDepartmentList = [];
@@ -50,8 +48,6 @@ class _HomePageState extends State<HomePage> {
   List<String> allDepId = [];
   List<String> allDesName = [];
   List<String> allDepName = [];
-
-//todo
 
   DateTimeRange dateRange =
       DateTimeRange(start: DateTime.now(), end: DateTime.now());
@@ -103,7 +99,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getData();
   }
@@ -140,10 +135,11 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.grey[400],
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await CreateNewEmployeeDialogue(context);
+          await createNewEmployeeDialogue(context);
         },
         label: const Text("Create New Employee"),
         icon: const Icon(Icons.add),
+        backgroundColor: Colors.grey[800],
       ),
       appBar: AppBar(
         leading: const Icon(Icons.apple_sharp),
@@ -181,12 +177,12 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (BuildContext context, int index) {
                     // final data = newEmployeeList[index];
 
-                    int desind = allDesId.indexOf(
+                    int desindex = allDesId.indexOf(
                         newEmployeeList[index].designationId.toString());
 
                     int depind = allDepId.indexOf(
                         newEmployeeList[index].departmentId.toString());
-                    // ! listTileBlock
+//? listTileBlock
                     return Padding(
                       padding: const EdgeInsets.all(6.0),
                       child: Container(
@@ -197,7 +193,6 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(20)),
                         padding: const EdgeInsets.all(10),
                         child: Column(
-                          // crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Row(
@@ -222,12 +217,13 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(right: 20),
                                     onPressed: () {
                                       log("pressed menu button more");
-//! menu option button for update n delete
+//? menu option button for update n delete
                                       showMenu(
                                         context: context,
                                         position: const RelativeRect.fromLTRB(
                                             500.0, 500.0, 140.0, 20.0),
                                         items: [
+                                          //! update
                                           PopupMenuItem(
                                             child: InkWell(
                                               onTap: () {
@@ -268,7 +264,7 @@ class _HomePageState extends State<HomePage> {
                                                 });
                                                 Navigator.pop(context);
 
-                                                UpdateEmployeeDetailShowDidalog(
+                                                updateEmployeeDetailShowDidalog(
                                                     context, index);
                                               },
                                               child: const ListTile(
@@ -276,25 +272,67 @@ class _HomePageState extends State<HomePage> {
                                                   leading: Icon(Icons.sync)),
                                             ),
                                           ),
+
+                                          //! delete
                                           PopupMenuItem(
                                             child: InkWell(
                                               onTap: () {
-                                                ServiceApi()
-                                                    .delete_employee(
-                                                        id: newEmployeeList[
-                                                                index]
-                                                            .id
-                                                            .toString())
-                                                    .whenComplete(() {
-                                                  getData();
-                                                  Navigator.of(context).pop();
-                                                  setState(() {
-                                                    allDesId = [];
-                                                    allDepId = [];
-                                                    allDepName = [];
-                                                    allDesName = [];
-                                                  });
-                                                });
+                                                Navigator.pop(context);
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      elevation: 3,
+                                                      title: const Text(
+                                                          "Are you sure you want to delete this Employee data"),
+                                                      actions: [
+                                                        ElevatedButton.icon(
+                                                            style:
+                                                                ElevatedButton
+                                                                    .styleFrom(
+                                                              backgroundColor:
+                                                                  Colors.grey,
+                                                            ),
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            icon: const Icon(
+                                                              Icons
+                                                                  .check_circle_outlined,
+                                                            ),
+                                                            label: const Text(
+                                                                "cancel")),
+                                                        const SizedBox(
+                                                            width: 30),
+                                                        ElevatedButton.icon(
+                                                            onPressed: () {
+                                                              ServiceApi()
+                                                                  .delete_employee(
+                                                                      id: newEmployeeList[
+                                                                              index]
+                                                                          .id
+                                                                          .toString())
+                                                                  .whenComplete(
+                                                                      () {
+                                                                getData();
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              });
+                                                            },
+                                                            icon: const Icon(
+                                                              Icons
+                                                                  .check_circle_outlined,
+                                                            ),
+                                                            label: const Text(
+                                                                "confirm"))
+                                                      ],
+                                                    );
+                                                  },
+                                                );
                                               },
                                               child: const ListTile(
                                                   title: Text("Remove"),
@@ -334,12 +372,12 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 RichText(
                                   text: TextSpan(
-                                    //! dpt name
+//? dpt name
                                     text: 'Designation :  ',
                                     style: DefaultTextStyle.of(context).style,
                                     children: <TextSpan>[
                                       TextSpan(
-                                          text: allDesName[desind].toString(),
+                                          text: allDesName[desindex].toString(),
 
                                           // text: newEmployeeList[index]
                                           //     .departmentId
@@ -362,16 +400,11 @@ class _HomePageState extends State<HomePage> {
                                       const EdgeInsets.symmetric(vertical: 10),
                                   child: RichText(
                                     text: TextSpan(
-                                      //! dpt name
                                       text: 'Department Id :',
                                       style: DefaultTextStyle.of(context).style,
                                       children: <TextSpan>[
                                         TextSpan(
                                             text: allDepId[depind].toString(),
-
-                                            // text: newEmployeeList[index]
-                                            //     .departmentId
-                                            //     .toString(),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.deepPurple,
@@ -383,16 +416,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 RichText(
                                   text: TextSpan(
-                                    //! dpt name
                                     text: 'Department Name : ',
                                     style: DefaultTextStyle.of(context).style,
                                     children: <TextSpan>[
                                       TextSpan(
                                           text: allDepName[depind].toString(),
-
-                                          // text: newEmployeeList[index]
-                                          //     .departmentId
-                                          //     .toString(),
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.deepPurple,
@@ -415,7 +443,7 @@ class _HomePageState extends State<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-// ! navigate to department list
+//? navigate to department list
                 ConstrainedBox(
                   constraints: const BoxConstraints.tightFor(
                     height: 50,
@@ -433,7 +461,7 @@ class _HomePageState extends State<HomePage> {
                     label: const Text("View Department List"),
                   ),
                 ),
-// ! navigate to designation List
+//? navigate to designation List
                 ConstrainedBox(
                   constraints: const BoxConstraints.tightFor(
                     height: 50,
@@ -462,7 +490,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<dynamic> UpdateEmployeeDetailShowDidalog(
+  Future<dynamic> updateEmployeeDetailShowDidalog(
       BuildContext context, int index) {
     return showDialog(
       context: context,
@@ -496,17 +524,14 @@ class _HomePageState extends State<HomePage> {
                             elevation: 5,
                             backgroundColor: Colors.green),
                         onPressed: () {
-                          ServiceApi()
-                              .update_employee(
-                                  id: newEmployeeList[index].id.toString(),
-                                  name: namefieldcontroller.text,
-                                  desId: dropDownDesignation1!,
-                                  depId: dropDownDepartment1!,
-                                  dob: dateTime4)
-                              .whenComplete(() {
-                            getData();
-                            Navigator.pop(context);
-                          });
+                          Navigator.pop(context);
+                          ServiceApi().update_employee(
+                              id: newEmployeeList[index].id.toString(),
+                              name: namefieldcontroller.text,
+                              desId: dropDownDesignation1!,
+                              depId: dropDownDepartment1!,
+                              dob: dateTime4);
+                          getData().whenComplete(() {});
                           setState(() {
                             allDesId = [];
                             allDepId = [];
@@ -584,12 +609,7 @@ class _HomePageState extends State<HomePage> {
                               dropdownWidth: 200,
                               hint: const Text('Select'),
                               value: dropDownDepartment,
-                              // Initial Value
-
-                              // Down Arrow Icon
                               icon: const Icon(Icons.keyboard_arrow_down),
-
-                              // Array list of items
                               items: allDepName.map((String items) {
                                 return DropdownMenuItem(
                                   value: items,
@@ -620,7 +640,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  CreateNewEmployeeDialogue(BuildContext context) async {
+  createNewEmployeeDialogue(BuildContext context) async {
     showDialog(
       context: context,
       builder: (ctx) {
@@ -764,12 +784,6 @@ class _HomePageState extends State<HomePage> {
                               .whenComplete(() {
                             Navigator.of(ctx).pop(context);
                             getData();
-                          });
-                          setState(() {
-                            allDesId = [];
-                            allDepId = [];
-                            allDepName = [];
-                            allDesName = [];
                           });
                         },
                         label: const Text(

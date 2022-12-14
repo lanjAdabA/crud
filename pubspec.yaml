@@ -42,6 +42,7 @@ dependencies:
   datetime_picker_formfield: ^2.0.1
   auto_route: ^5.0.4
   flutter_easyloading: ^3.0.5
+  popover: ^0.2.7
 
 dev_dependencies:
   flutter_test:
