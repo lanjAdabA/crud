@@ -57,7 +57,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                   )),
             ),
           ],
-          title: const Text("CRUD operation"),
+          title: const Text("[CRUD operation(Department)]"),
         ),
         body: SingleChildScrollView(
           child: Padding(

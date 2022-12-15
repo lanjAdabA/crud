@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                 )),
           ),
         ],
-        title: const Text("CRUD operation"),
+        title: const Text("[CRUD operation(Epmloyee)]"),
       ),
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -524,19 +524,20 @@ class _HomePageState extends State<HomePage> {
                             elevation: 5,
                             backgroundColor: Colors.green),
                         onPressed: () {
-                          Navigator.pop(context);
                           ServiceApi().update_employee(
                               id: newEmployeeList[index].id.toString(),
                               name: namefieldcontroller.text,
                               desId: dropDownDesignation1!,
                               depId: dropDownDepartment1!,
                               dob: dateTime4);
-                          getData().whenComplete(() {});
-                          setState(() {
-                            allDesId = [];
-                            allDepId = [];
-                            allDepName = [];
-                            allDesName = [];
+                          Navigator.pop(context);
+                          getData().whenComplete(() {
+                            setState(() {
+                              allDesId = [];
+                              allDepId = [];
+                              allDepName = [];
+                              allDesName = [];
+                            });
                           });
                         },
                         label: const Text(
