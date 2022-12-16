@@ -1,21 +1,21 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:crud/models/department.dart';
+import 'package:crud/models/designation.dart';
 import 'package:crud/router/router.gr.dart';
 import 'package:crud/serviceAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-class DepartmentPage extends StatefulWidget {
-  const DepartmentPage({super.key});
+class DesignationPage extends StatefulWidget {
+  const DesignationPage({super.key});
 
   @override
-  State<DepartmentPage> createState() => _DepartmentPageState();
+  State<DesignationPage> createState() => _DesignationPageState();
 }
 
-class _DepartmentPageState extends State<DepartmentPage> {
-  List<Department> newDepartmentList = [];
+class _DesignationPageState extends State<DesignationPage> {
+  List<Designation> newDesignationList = [];
 
-  final TextEditingController departmentfieldcontroller =
+  final TextEditingController designationfieldcontroller =
       TextEditingController();
 
   @override
@@ -26,27 +26,27 @@ class _DepartmentPageState extends State<DepartmentPage> {
   }
 
   Future getData() async {
-    final departmentData = await ServiceApi().get_department();
+    final designationData = await ServiceApi().get_designation();
 
     setState(() {
-      newDepartmentList = departmentData!;
+      newDesignationList = designationData!;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue[100],
+        backgroundColor: Colors.red[100],
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
             await createNewDepartmentDialogue(context);
           },
-          label: const Text("Create New Department"),
+          label: const Text("Create New Designation"),
           icon: const Icon(Icons.add),
-          backgroundColor: Colors.blue[500],
+          backgroundColor: Colors.red[500],
         ),
         appBar: AppBar(
-          backgroundColor: Colors.blue[400],
+          backgroundColor: Colors.red[400],
           leading: const Icon(Icons.apple_sharp),
           centerTitle: false,
           actions: [
@@ -71,17 +71,17 @@ class _DepartmentPageState extends State<DepartmentPage> {
                 center: Alignment.topLeft,
                 radius: 7.0,
                 colors: <Color>[
-                  Color.fromARGB(255, 255, 0, 0),
-                  Color.fromARGB(255, 200, 0, 0),
-                  Color.fromARGB(255, 150, 0, 0),
-                  Color.fromARGB(255, 70, 0, 0),
-                  Color.fromARGB(255, 0, 0, 0),
+                  Colors.purple,
+                  Colors.indigo,
+                  Colors.blue,
+                  Colors.green,
+                  Colors.yellow,
                 ],
                 tileMode: TileMode.mirror,
               ).createShader(bounds);
             },
             child: const Text(
-              '[CRUD Operation (Department)]',
+              '[CRUD Operation (Designation)]',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -93,17 +93,21 @@ class _DepartmentPageState extends State<DepartmentPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: newDepartmentList.length,
+                  itemCount: newDesignationList.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.black),
-                          color: index.isEven
-                              ? Colors.blue[200]
-                              : Colors.blue[300],
-                          borderRadius: BorderRadius.circular(10),
+                          color:
+                              index.isEven ? Colors.red[200] : Colors.red[300],
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.black,
+                                spreadRadius: 2,
+                                blurRadius: 5)
+                          ],
                         ),
                         padding: const EdgeInsets.all(10.0),
                         child: Column(
@@ -115,20 +119,20 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Icon(
-                                      Icons.ac_unit,
+                                      Icons.local_fire_department_outlined,
                                       color: index.isEven
-                                          ? Colors.blue
-                                          : Colors.blue[100],
+                                          ? Colors.red
+                                          : Colors.amber,
                                     ),
                                     RichText(
                                       text: TextSpan(
-                                        text: 'Department Name:   ',
+                                        text: 'Designation Name:   ',
                                         style:
                                             DefaultTextStyle.of(context).style,
                                         children: <TextSpan>[
                                           TextSpan(
-                                              text:
-                                                  newDepartmentList[index].name,
+                                              text: newDesignationList[index]
+                                                  .name,
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
@@ -147,7 +151,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                             DefaultTextStyle.of(context).style,
                                         children: <TextSpan>[
                                           TextSpan(
-                                              text: newDepartmentList[index]
+                                              text: newDesignationList[index]
                                                   .id
                                                   .toString(),
                                               style: const TextStyle(
@@ -199,8 +203,8 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                       // if value 1 show dialog
                                       if (value == 1) {
                                         setState(() {
-                                          departmentfieldcontroller.text =
-                                              newDepartmentList[index].name;
+                                          designationfieldcontroller.text =
+                                              newDesignationList[index].name;
                                         });
                                         showDialog(
                                           context: context,
@@ -220,7 +224,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                                               .styleFrom(
                                                                   shadowColor:
                                                                       Colors
-                                                                          .blue,
+                                                                          .red,
                                                                   elevation: 5,
                                                                   backgroundColor:
                                                                       Colors.grey[
@@ -256,13 +260,13 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                                                             .green),
                                                             onPressed: () {
                                                               ServiceApi()
-                                                                  .update_department(
-                                                                      id: newDepartmentList[
+                                                                  .update_designation(
+                                                                      id: newDesignationList[
                                                                               index]
                                                                           .id
                                                                           .toString(),
-                                                                      departmentName:
-                                                                          departmentfieldcontroller
+                                                                      designationName:
+                                                                          designationfieldcontroller
                                                                               .text)
                                                                   .whenComplete(
                                                                       () {
@@ -284,7 +288,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                                     ),
                                                   ],
                                                   title: const Text(
-                                                      "Update Department"),
+                                                      "Update Designation"),
                                                   content: Form(
                                                     child: SizedBox(
                                                       height: 50,
@@ -295,7 +299,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                                                   TextInputType
                                                                       .text,
                                                               controller:
-                                                                  departmentfieldcontroller,
+                                                                  designationfieldcontroller,
                                                               decoration:
                                                                   const InputDecoration(
                                                                 hintText:
@@ -352,8 +356,8 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                                                 .icon(
                                                                     onPressed:
                                                                         () {
-                                                                      ServiceApi().delete_department(
-                                                                          id: newDepartmentList[index]
+                                                                      ServiceApi().delete_designation(
+                                                                          id: newDesignationList[index]
                                                                               .id
                                                                               .toString());
                                                                       getData()
@@ -384,7 +388,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                               ],
                             ),
                             Divider(
-                              color: Colors.blue[100],
+                              color: Colors.red[100],
                               thickness: 5,
                             ),
                           ],
@@ -397,25 +401,25 @@ class _DepartmentPageState extends State<DepartmentPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-//? navigate to designation list
+//? navigate to department list
                   ConstrainedBox(
                     constraints: const BoxConstraints.tightFor(
                       height: 50,
                     ),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          shadowColor: Colors.red,
+                          shadowColor: Colors.blue,
                           elevation: 10,
-                          backgroundColor: Colors.blue[700]),
+                          backgroundColor: Colors.red[700]),
                       icon: const Icon(Icons.business_rounded),
                       onPressed: () {
-                        context.router.push(const DesignationRoute());
-                        EasyLoading.showToast("Showing designation List");
+                        context.router.push(const DepartmentRoute());
+                        EasyLoading.showToast("Showing Department List");
                       },
                       label: const Text("View Department List"),
                     ),
                   ),
-//? navigate to employee List
+//? navigate to designation List
                   ConstrainedBox(
                     constraints: const BoxConstraints.tightFor(
                       height: 50,
@@ -424,7 +428,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                       style: ElevatedButton.styleFrom(
                           shadowColor: Colors.grey,
                           elevation: 10,
-                          backgroundColor: Colors.blue[700]),
+                          backgroundColor: Colors.red[700]),
                       icon: const Icon(Icons.badge_outlined),
                       onPressed: () {
                         context.router.push(const AuthFlowRoute());
@@ -451,17 +455,17 @@ class _DepartmentPageState extends State<DepartmentPage> {
                   padding: const EdgeInsets.symmetric(vertical: 30.0),
                   child: TextField(
                     keyboardType: TextInputType.text,
-                    controller: departmentfieldcontroller,
+                    controller: designationfieldcontroller,
                     decoration:
                         const InputDecoration.collapsed(hintText: 'CLICK HERE'),
                   ),
                 ),
                 title: const Text(
-                  "Add new Department ! ",
+                  "Add new Designation ! ",
                   style: TextStyle(fontSize: 22),
                 ),
                 icon: const Icon(Icons.addchart_outlined),
-                backgroundColor: Colors.blue[100],
+                backgroundColor: Colors.red[100],
                 actions: [
                   ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -471,7 +475,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                       },
                       icon: const Icon(
                         Icons.cancel_outlined,
-                        color: Colors.blue,
+                        color: Colors.red,
                       ),
                       label: const Text("cancel")),
                   const SizedBox(
@@ -480,8 +484,9 @@ class _DepartmentPageState extends State<DepartmentPage> {
                   ElevatedButton.icon(
                       onPressed: () async {
                         await ServiceApi()
-                            .create_department(
-                                departmentName: departmentfieldcontroller.text)
+                            .create_designation(
+                                designationName:
+                                    designationfieldcontroller.text)
                             .whenComplete(() {
                           Navigator.of(context).pop();
                           getData();

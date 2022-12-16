@@ -43,6 +43,10 @@ dependencies:
   auto_route: ^5.0.4
   flutter_easyloading: ^3.0.5
   popover: ^0.2.7
+  flutter_bloc: ^8.1.1
+  bloc: ^8.1.0
+  equatable: ^2.0.5
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
@@ -69,8 +73,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/userLogin.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
