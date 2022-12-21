@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "769232731092",
+    "project_id": "cloudmessagingcrudapp",
+    "storage_bucket": "cloudmessagingcrudapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769232731092:android:20491fb7d043cc64623441",
+        "android_client_info": {
+          "package_name": "com.globizs.crud"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "769232731092-uh8gmqffk6hs4ohc93rgadq62fqb7luu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTxRaNwaxZiVB-6-GIyrUtSOEwb8dUBGc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "769232731092-uh8gmqffk6hs4ohc93rgadq62fqb7luu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

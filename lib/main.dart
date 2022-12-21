@@ -1,11 +1,36 @@
+import 'dart:developer';
+
+import 'package:crud/firebase_options.dart';
 import 'package:crud/logic/cubit/authFlow/cubit/auth_flow_cubit.dart';
 import 'package:crud/logic/cubit/login_cubit.dart';
 import 'package:crud/router/router.gr.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-void main() {
+Future<void> _firebaseBackgroundMessaging(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("handling a background message: ${message.messageId}");
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  messaging.getToken().then((value) => log(value.toString()));
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessaging);
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print("got msg while on foreground ${message.data}");
+
+    if (message.notification != null) {
+      print("message also contains a notification: ${message.notification}");
+    }
+  });
+
   runApp(MyApp());
 }
 

@@ -2,35 +2,49 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:crud/models/department.dart';
 import 'package:crud/models/designation.dart';
 import 'package:crud/models/employee.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceApi {
-  Future create_employee(
-      {required String name,
-      required String desId,
-      required String depId,
-      required String dob}) async {
-    final response = await http.post(
+  Future create_employee({
+    required String name,
+    required String desId,
+    required String depId,
+    required String dob,
+    required String image,
+    required String location,
+  }) async {
+    var na = DateTime.now().millisecondsSinceEpoch;
+    final prefs = await SharedPreferences.getInstance();
+    String filename = '$na.jpg';
+
+    var request = http.MultipartRequest(
+        'POST',
         Uri.parse(
-            "http://phpstack-598410-2859373.cloudwaysapps.com/api/employees"),
-        body: {
-          "name": name,
-          "designation_id": desId,
-          "department_id": depId,
-          "date_of_birth": dob
-        });
+            'http://phpstack-598410-2859373.cloudwaysapps.com/api/employees'));
+    request.fields['name'] = name;
+    request.fields['designation_id'] = desId;
+    request.fields['department_id'] = depId;
+    request.fields['date_of_birth'] = dob;
+    request.fields['geo_location'] = location;
+    request.files.add(http.MultipartFile.fromBytes(
+        'image', File(image).readAsBytesSync(),
+        filename: filename));
+    // request.headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      log('Successfully Added new Employee');
+      log('Successfully post Data');
+      prefs.setInt('emp_createcode', response.statusCode);
     } else {
-      log('Failed to Add Employee Data. ');
-      log(response.statusCode.toString());
-      return null;
+      log('Failed to PostData.');
     }
+    return null;
   }
 
   Future<List<Employee>?> get_employee() async {

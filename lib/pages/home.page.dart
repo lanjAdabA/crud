@@ -1,19 +1,20 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'dart:developer';
-
+import 'package:crud/widgets/locationService.dart';
+import 'package:crud/widgets/navigateToPages.dart';
+import 'package:crud/widgets/uploadImage.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:crud/router/router.gr.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-
 import 'package:crud/models/department.dart';
 import 'package:crud/models/designation.dart';
 import 'package:crud/models/employee.dart';
 import 'package:crud/serviceAPI.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -56,46 +57,44 @@ class _HomePageState extends State<HomePage> {
   DateTime? start = DateTime.now();
   DateTime? end = DateTime.now();
 
-  Widget _dataofbirth(String dob) {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Padding(
-            padding: EdgeInsets.only(top: 10),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: DateTimeField(
-              controller: TextEditingController(text: dob),
-              decoration: const InputDecoration(
-                labelText: ' Select Date of Birth',
-              ),
-              format: format,
-              onShowPicker: (context, currentValue) {
-                return showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2030),
-                        helpText: "SELECT DATE OF BIRTH",
-                        cancelText: "CANCEL",
-                        confirmText: "OK",
-                        fieldHintText: "DATE/MONTH/YEAR",
-                        fieldLabelText: "ENTER YOUR DATE OF BIRTH",
-                        errorFormatText: "Enter a Valid Date",
-                        errorInvalidText: "Date Out of Range")
-                    .then((value) {
-                  setState(() {
-                    dateTime = "${value!.year}-${value.month}-${value.day}";
-                    dateTime2 = "${value.year}-${value.month}-${value.day}";
-                  });
+  String profileImage = "";
+  final location = "";
 
-                  return value;
-                });
-              },
-            ),
-          ),
-        ]);
+  Widget _dataofbirth(String dob) {
+    return DateTimeField(
+      controller: TextEditingController(text: dob),
+      decoration: const InputDecoration(
+        labelText: ' Select Date of Birth',
+      ),
+      format: format,
+      onShowPicker: (context, currentValue) {
+        return showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2030),
+                helpText: "SELECT DATE OF BIRTH",
+                cancelText: "CANCEL",
+                confirmText: "OK",
+                fieldHintText: "DATE/MONTH/YEAR",
+                fieldLabelText: "ENTER YOUR DATE OF BIRTH",
+                errorFormatText: "Enter a Valid Date",
+                errorInvalidText: "Date Out of Range")
+            .then((value) async {
+          final prefs = await SharedPreferences.getInstance();
+          String image = prefs.getString("profileImage")!;
+          setState(() {
+            profileImage = image;
+
+            dateTime = "${value!.year}-${value.month}-${value.day}";
+            dateTime2 = "${value.year}-${value.month}-${value.day}";
+          });
+
+          log(profileImage);
+          return value;
+        });
+      },
+    );
   }
 
   @override
@@ -126,8 +125,20 @@ class _HomePageState extends State<HomePage> {
     for (var element in newDepartmentList) {
       allDepName.add(element.name.toString());
     }
-    log(allDepId.toString());
-    log(allDesId.toString());
+    log(allDepName.toString());
+    log(allDesName.toString());
+  }
+
+  Future getData2() async {
+    final employeeData = await ServiceApi().get_employee();
+    final designationData = await ServiceApi().get_designation();
+    final departmentData = await ServiceApi().get_department();
+
+    setState(() {
+      newEmployeeList = employeeData!;
+      newDepartmentList = departmentData!;
+      newDesignationList = designationData!;
+    });
   }
 
   @override
@@ -157,7 +168,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.only(right: 20.0),
             child: InkWell(
                 onTap: () {
-                  getData();
+                  getData2();
                 },
                 child: Column(
                   children: const [
@@ -173,9 +184,6 @@ class _HomePageState extends State<HomePage> {
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            const SizedBox(
-              height: 10,
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: ListView.builder(
@@ -204,23 +212,13 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                RichText(
-                                  text: TextSpan(
-                                    text: 'Employee Name:   ',
-                                    style: DefaultTextStyle.of(context).style,
-                                    children: <TextSpan>[
-                                      TextSpan(
-                                          text: newEmployeeList[index].name,
-                                          style: const TextStyle(
-                                              overflow: TextOverflow.fade,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.blueGrey,
-                                              fontStyle: FontStyle.normal,
-                                              fontSize: 18)),
-                                    ],
-                                  ),
+                                const Text(
+                                  "Employee Details",
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 IconButton(
                                     padding: const EdgeInsets.only(right: 20),
@@ -367,59 +365,88 @@ class _HomePageState extends State<HomePage> {
                                         Icons.more_horiz,
                                         size: 25,
                                       ),
-                                    ))
+                                    )),
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     RichText(
                                       text: TextSpan(
-                                        text: 'Employee Id:   ',
+                                        text: 'Employee Name:   ',
                                         style:
                                             DefaultTextStyle.of(context).style,
                                         children: <TextSpan>[
                                           TextSpan(
-                                              text: newEmployeeList[index]
-                                                  .id
-                                                  .toString(),
+                                              text: newEmployeeList[index].name,
                                               style: const TextStyle(
+                                                  overflow: TextOverflow.fade,
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.deepPurple,
+                                                  color: Colors.blueGrey,
                                                   fontStyle: FontStyle.normal,
                                                   fontSize: 18)),
                                         ],
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: RichText(
-                                        text: TextSpan(
-                                          text: 'Department Id :',
-                                          style: DefaultTextStyle.of(context)
-                                              .style,
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text:
-                                                    allDepId[depind].toString(),
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.deepPurple,
-                                                    fontStyle: FontStyle.normal,
-                                                    fontSize: 18)),
-                                          ],
-                                        ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          RichText(
+                                            text: TextSpan(
+                                              text: 'Employee Id:   ',
+                                              style:
+                                                  DefaultTextStyle.of(context)
+                                                      .style,
+                                              children: <TextSpan>[
+                                                TextSpan(
+                                                    text: newEmployeeList[index]
+                                                        .id
+                                                        .toString(),
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color:
+                                                            Colors.deepPurple,
+                                                        fontStyle:
+                                                            FontStyle.normal,
+                                                        fontSize: 18)),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 30,
+                                          ),
+                                          RichText(
+                                            text: TextSpan(
+                                              text: 'Department Id :',
+                                              style:
+                                                  DefaultTextStyle.of(context)
+                                                      .style,
+                                              children: <TextSpan>[
+                                                TextSpan(
+                                                    text: allDepId[depind]
+                                                        .toString(),
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color:
+                                                            Colors.deepPurple,
+                                                        fontStyle:
+                                                            FontStyle.normal,
+                                                        fontSize: 18)),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
                                     RichText(
                                       text: TextSpan(
 //? dpt name
@@ -440,7 +467,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+                                          vertical: 10.0),
                                       child: RichText(
                                         text: TextSpan(
                                           text: 'Department Name : ',
@@ -459,8 +486,29 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                     ),
+                                    RichText(
+                                      text: TextSpan(
+                                        text: 'Location : ',
+                                        style:
+                                            DefaultTextStyle.of(context).style,
+                                        children: <TextSpan>[
+                                          TextSpan(
+                                              text: newEmployeeList[index]
+                                                  .geoLocation,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.black54,
+                                                  fontStyle: FontStyle.normal,
+                                                  fontSize: 18)),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
+                                ClipOval(
+                                    child: Image.network(
+                                        height: 120,
+                                        "http://phpstack-598410-2859373.cloudwaysapps.com/${newEmployeeList[index].image}")),
                               ],
                             ),
                           ],
@@ -470,49 +518,9 @@ class _HomePageState extends State<HomePage> {
                   }),
             ),
             const SizedBox(
-              height: 20,
+              height: 12,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-//? navigate to department list
-                ConstrainedBox(
-                  constraints: const BoxConstraints.tightFor(
-                    height: 50,
-                  ),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        shadowColor: Colors.blue[700],
-                        elevation: 10,
-                        backgroundColor: Colors.grey[700]),
-                    icon: const Icon(Icons.business_rounded),
-                    onPressed: () {
-                      context.router.push(const DepartmentRoute());
-                      EasyLoading.showToast("Showing Department List");
-                    },
-                    label: const Text("View Department List"),
-                  ),
-                ),
-//? navigate to designation List
-                ConstrainedBox(
-                  constraints: const BoxConstraints.tightFor(
-                    height: 50,
-                  ),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        shadowColor: Colors.red,
-                        elevation: 10,
-                        backgroundColor: Colors.grey[700]),
-                    icon: const Icon(Icons.badge_outlined),
-                    onPressed: () {
-                      context.router.push(const DesignationRoute());
-                      EasyLoading.showToast(" Showing Designation List");
-                    },
-                    label: const Text("View Designation List"),
-                  ),
-                ),
-              ],
-            ),
+            const NavigateToPages(),
             SizedBox(
               height: MediaQuery.of(context).size.height / 6,
             )
@@ -698,23 +706,27 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                height: MediaQuery.of(context).size.height / 4,
+                height: MediaQuery.of(context).size.height / 2.5,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    //*upload avatar
+                    const UploadImage(),
+                    //*namefield
+
                     TextField(
                       keyboardType: TextInputType.text,
                       controller: namefieldcontroller,
-                      decoration: const InputDecoration.collapsed(
+                      decoration: const InputDecoration(
+                          // decoration: const InputDecoration.collapsed(
+                          // for hidden underline
+
                           hintText: 'Enter Employee Name:'),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+
+                    //* designstion field
+
                     Row(
                       children: [
                         const Text("Select Designation : "),
@@ -751,17 +763,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Row(
                       children: [
-                        const Text("Select Department : "),
+                        const Text("Select Department :  "),
                         DropdownButtonHideUnderline(
                           child: DropdownButton2(
                             dropdownDecoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10)),
-                            alignment: Alignment.center,
-                            dropdownElevation: 10,
-                            dropdownPadding: const EdgeInsets.only(left: 25),
                             dropdownDirection: DropdownDirection.left,
                             dropdownWidth: 200,
-                            hint: const Text('Choose'),
+                            hint: const Text(' Choose'),
                             value: dropDownDepartment,
                             icon: const Icon(Icons.keyboard_arrow_down),
                             items: allDepName.map((String items) {
@@ -783,6 +792,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     _dataofbirth(dateTime2),
+                    const LocationService(),
                   ],
                 ),
               ),
@@ -817,6 +827,15 @@ class _HomePageState extends State<HomePage> {
                             elevation: 5,
                             backgroundColor: Colors.green),
                         onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          String location = prefs.getString("finalLocation")!;
+
+                          setState() {
+                            location = location;
+                          }
+
+                          EasyLoading.show(status: 'Adding..');
+                          log(location);
                           log(dropDownDepartment1.toString());
                           log(dropDownDesignation1.toString());
                           log(dateTime.toString());
@@ -825,10 +844,14 @@ class _HomePageState extends State<HomePage> {
                                   name: namefieldcontroller.text,
                                   desId: dropDownDesignation1.toString(),
                                   depId: dropDownDepartment1.toString(),
-                                  dob: dateTime.toString())
+                                  dob: dateTime.toString(),
+                                  image: profileImage,
+                                  location: location)
                               .whenComplete(() {
+                            EasyLoading.dismiss();
+
                             Navigator.of(ctx).pop(context);
-                            getData();
+                            getData2();
                           });
                         },
                         label: const Text(
