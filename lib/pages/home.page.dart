@@ -41,6 +41,8 @@ class _HomePageState extends State<HomePage> {
   String dateTime4 = "";
 
   List<Employee> newEmployeeList = [];
+  List slno = [];
+
   List<Designation> newDesignationList = [];
   List<Department> newDepartmentList = [];
 
@@ -104,6 +106,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future getData() async {
+    int i;
     final employeeData = await ServiceApi().get_employee();
     final designationData = await ServiceApi().get_designation();
     final departmentData = await ServiceApi().get_department();
@@ -127,9 +130,14 @@ class _HomePageState extends State<HomePage> {
     }
     log(allDepName.toString());
     log(allDesName.toString());
+    for (i = 1; i <= newEmployeeList.length; i++) {
+      slno.add(i);
+    }
+    log(slno.toString());
   }
 
   Future getData2() async {
+    int i;
     final employeeData = await ServiceApi().get_employee();
     final designationData = await ServiceApi().get_designation();
     final departmentData = await ServiceApi().get_department();
@@ -138,7 +146,12 @@ class _HomePageState extends State<HomePage> {
       newEmployeeList = employeeData!;
       newDepartmentList = departmentData!;
       newDesignationList = designationData!;
+      slno = [];
     });
+    for (i = 1; i <= newEmployeeList.length; i++) {
+      slno.add(i);
+    }
+    log(slno.toString());
   }
 
   @override
@@ -212,8 +225,14 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                Text(
+                                  slno[index].toString(),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepOrange[800]),
+                                ),
                                 const Text(
                                   "Employee Details",
                                   style: TextStyle(

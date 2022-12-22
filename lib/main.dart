@@ -9,11 +9,19 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+AndroidNotificationChannel channel = const AndroidNotificationChannel(
+    "High importance channel", "high importance notification",
+    importance: Importance.high, playSound: true);
 
 Future<void> _firebaseBackgroundMessaging(RemoteMessage message) async {
   await Firebase.initializeApp();
   print("handling a background message: ${message.messageId}");
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
